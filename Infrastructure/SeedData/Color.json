@@ -1,0 +1,22 @@
+﻿[
+	{
+		"Id": 1,
+		"Name": "Colorless"
+	},
+	{
+		"Id": 2,
+		"Name": "Near Colorless"
+	},
+	{
+		"Id": 3,
+		"Name": "Faint Yellow"
+	},
+	{
+		"Id": 4,
+		"Name": "Very Light Yellow"
+	},
+	{
+		"Id": 5,
+		"Name": "Light Yellow"
+	}
+]

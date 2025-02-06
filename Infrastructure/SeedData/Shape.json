@@ -1,0 +1,50 @@
+﻿[
+    {
+        "Id": 1,
+        "Name": "Cushion"
+    },
+    {
+        "Id": 2,
+        "Name": "Radiant"
+    },
+    {
+        "Id": 3,
+        "Name": "Pricess"
+    },
+    {
+        "Id": 4,
+        "Name": "Asscher"
+    },
+    {
+        "Id": 5,
+        "Name": "Round"
+    },
+    {
+        "Id": 6,
+        "Name": "Heart"
+    },
+    {
+        "Id": 7,
+        "Name": "Trilliant"
+    },
+    {
+        "Id": 8,
+        "Name": "Oval"
+    },
+    {
+        "Id": 9,
+        "Name": "Pear"
+    },
+    {
+        "Id": 10,
+        "Name": "Emerald"
+    },
+    {
+        "Id": 11,
+        "Name": "Marquise"
+    },
+    {
+        "Id": 12,
+        "Name": "Baguette"
+    }
+]

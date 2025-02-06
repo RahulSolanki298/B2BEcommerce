@@ -1,0 +1,38 @@
+﻿[
+    {
+        "Id": 1,
+        "Name": "Princess"
+    },
+    {
+        "Id": 2,
+        "Name": "Pear"
+    },
+    {
+        "Id": 3,
+        "Name": "Marquise"
+    },
+    {
+        "Id": 4,
+        "Name": "Oval"
+    },
+    {
+        "Id": 5,
+        "Name": "Radiant"
+    },
+    {
+        "Id": 6,
+        "Name": "Emarald"
+    },
+    {
+        "Id": 7,
+        "Name": "Heart"
+    },
+    {
+        "Id": 8,
+        "Name": "Cushion"
+    },
+    {
+        "Id": 9,
+        "Name": "Asscher"
+    }
+]
