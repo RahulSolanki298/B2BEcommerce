@@ -1,4 +1,5 @@
 ﻿@using MudBlazor
+@using Microsoft.AspNetCore.Components
 @inherits LayoutComponentBase
 
 @* Required *@
@@ -7,34 +8,47 @@
 
 @* Needed for dialogs *@
 <MudDialogProvider />
-
-@* Needed for snackbars *@
 <MudSnackbarProvider />
 
+@inject NavigationManager Navigation
 
-
-<MudLayout>
-    <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
-        <MudSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
-    </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-        @*NavMenu*@
-    </MudDrawer>
+@* Conditionally hide the sidebar on the login page *@
+@if (!Navigation.Uri.Contains("/"))
+{
     <MudMainContent>
         @Body
     </MudMainContent>
-</MudLayout>
+}
+else
+{
+    <MudLayout>
+        <MudAppBar>
+            <MudIconButton 
+                Icon="@Icons.Material.Filled.Menu" 
+                Color="Color.Inherit" 
+                Edge="Edge.Start" 
+                OnClick="@((e)=>DrawerToggle())" />
+            B2B Ecommerce
+        </MudAppBar>
+        <MudDrawer @bind-Open="@_drawerOpen">
+            <MudDrawerHeader>
+                <MudText Typo="Typo.h5">Admin Panel</MudText>
+            </MudDrawerHeader>
+            <MudDrawerContainer>
+                <NavMenu />
+            </MudDrawerContainer>
+        </MudDrawer>
+        <MudMainContent>
+            @Body
+        </MudMainContent>
+    </MudLayout>
+}
 
 @code {
-    bool _drawerOpen = true;
+    bool _drawerOpen = false;
 
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
     }
 }
-
-

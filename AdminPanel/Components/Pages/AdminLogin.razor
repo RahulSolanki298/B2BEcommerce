@@ -1,0 +1,75 @@
+﻿@page "/"
+@using AdminPanel.Services
+@using Microsoft.JSInterop;
+@inject AccountServices AdminLoginService
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@using System.Net.Http
+@using AdminPanel.ViewModel
+
+@using MudBlazor
+
+<h3 class="text-center mb-4">Admin Login</h3>
+
+<EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <MudPaper Class="d-flex flex-column p-4 mx-auto" Elevation="4" MaxWidth="xs">
+        <MudTextField Label="Username"
+                      Variant="Variant.Filled"
+                      Margin="Margin.Dense"
+                      @bind-Value="loginModel.UserName"
+                      Required="true"
+                      Immediate="true" />
+        <MudTextField Label="Password"
+                      Variant="Variant.Filled"
+                      Margin="Margin.Dense"
+                      @bind-Value="loginModel.Password"
+                      Type="password"
+                      Required="true"
+                      Immediate="true" />
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   FullWidth="true"
+                   Class="mt-4"
+                   Type="submit">
+            Login
+        </MudButton>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <MudAlert Severity="Severity.Error" Class="mt-3">
+                @errorMessage
+            </MudAlert>
+        }
+    </MudPaper>
+</EditForm>
+
+@code {
+	private AdminLoginModel loginModel = new AdminLoginModel();
+	private string errorMessage;
+	private async Task HandleLogin()
+	{
+		try
+		{
+			var response = await AdminLoginService.AdminLoginAsync(loginModel);
+
+			if (response.Success)
+			{
+				// Save the JWT token, for example in LocalStorage or a session
+				await JSRuntime.InvokeVoidAsync("localStorage.setItem", "token", response.Token);
+				NavigationManager.NavigateTo("/dashboard");
+			}
+			else
+			{
+				errorMessage = response.Message;
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+}

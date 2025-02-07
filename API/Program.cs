@@ -65,7 +65,7 @@ builder.Services.AddCors(options =>
     {
         policy.AllowAnyHeader()
             .AllowAnyMethod()
-            .WithOrigins(builder.Configuration.GetValue<string>("Cors:AllowedOrigin") ?? "https://localhost:4200");
+            .WithOrigins(builder.Configuration.GetValue<string>("Cors:AllowedOrigin") ?? "https://localhost:7161");
     });
 });
 

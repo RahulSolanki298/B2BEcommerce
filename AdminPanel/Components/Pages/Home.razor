@@ -1,7 +1,109 @@
-﻿@page "/"
+﻿@page "/dashboard"
+@using MudBlazor
 
-<PageTitle>Home</PageTitle>
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+    <MudGrid>
+        <!-- Overview Summary -->
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="3" Class="pa-4">
+                <MudText Typo="Typo.h6">Total Sales</MudText>
+                <MudText Typo="Typo.body1" Class="mt-2">$120,450</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="3" Class="pa-4">
+                <MudText Typo="Typo.h6">Orders Today</MudText>
+                <MudText Typo="Typo.body1" Class="mt-2">245</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="3" Class="pa-4">
+                <MudText Typo="Typo.h6">New Customers</MudText>
+                <MudText Typo="Typo.body1" Class="mt-2">38</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="3" Class="pa-4">
+                <MudText Typo="Typo.h6">Total Revenue</MudText>
+                <MudText Typo="Typo.body1" Class="mt-2">$1,045,230</MudText>
+            </MudPaper>
+        </MudItem>
 
-<h1>Hello, world!</h1>
+        <!-- Sales Overview Chart -->
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="3" Class="pa-4">
+                <MudText Typo="Typo.h6">Sales Overview</MudText>
+                <!-- Replace this with actual chart component -->
+                <MudCard Class="mt-4" Style="height: 250px;">
+                    <MudText Centered Class="mt-4">Chart Here</MudText>
+                </MudCard>
+            </MudPaper>
+        </MudItem>
 
-Welcome to your new app.
+        <!-- Top Selling Products -->
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="3" Class="pa-4">
+                <MudText Typo="Typo.h6">Top Selling Products</MudText>
+                
+            </MudPaper>
+        </MudItem>
+
+        <!-- Recent Activities -->
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="3" Class="pa-4">
+                <MudText Typo="Typo.h6">Recent Activities</MudText>
+                @* <MudList>
+                    <MudListItem>
+                        <MudText>Order #1024 - Completed</MudText>
+                        <MudText Class="ml-auto" Typo="Typo.body2">2 minutes ago</MudText>
+                    </MudListItem>
+                    <MudListItem>
+                        <MudText>Customer John Doe - Registered</MudText>
+                        <MudText Class="ml-auto" Typo="Typo.body2">15 minutes ago</MudText>
+                    </MudListItem>
+                    <MudListItem>
+                        <MudText>Order #1025 - Shipped</MudText>
+                        <MudText Class="ml-auto" Typo="Typo.body2">30 minutes ago</MudText>
+                    </MudListItem>
+                </MudList> *@
+            </MudPaper>
+        </MudItem>
+
+        <!-- Recent Orders -->
+        <MudItem xs="12">
+            <MudPaper Elevation="3" Class="pa-4">
+                <MudText Typo="Typo.h6">Recent Orders</MudText>
+                @* <MudTable>
+                    <MudTableHead>
+                        <MudTableRow>
+                            <MudTableCell>Order ID</MudTableCell>
+                            <MudTableCell>Customer</MudTableCell>
+                            <MudTableCell>Status</MudTableCell>
+                            <MudTableCell>Amount</MudTableCell>
+                        </MudTableRow>
+                    </MudTableHead>
+                    <MudTableBody>
+                        <MudTableRow>
+                            <MudTableCell>1024</MudTableCell>
+                            <MudTableCell>John Doe</MudTableCell>
+                            <MudTableCell>Completed</MudTableCell>
+                            <MudTableCell>$350</MudTableCell>
+                        </MudTableRow>
+                        <MudTableRow>
+                            <MudTableCell>1025</MudTableCell>
+                            <MudTableCell>Jane Smith</MudTableCell>
+                            <MudTableCell>Shipped</MudTableCell>
+                            <MudTableCell>$120</MudTableCell>
+                        </MudTableRow>
+                        <MudTableRow>
+                            <MudTableCell>1026</MudTableCell>
+                            <MudTableCell>Robert Brown</MudTableCell>
+                            <MudTableCell>Pending</MudTableCell>
+                            <MudTableCell>$89</MudTableCell>
+                        </MudTableRow>
+                    </MudTableBody>
+                </MudTable> *@
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>

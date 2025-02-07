@@ -1,9 +1,20 @@
 using AdminPanel.Components;
+using AdminPanel.Services;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMudServices();
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<AccountServices>();
 // Add services to the container.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowedOrigin", builder =>
+        builder.WithOrigins("https://localhost:7161") // The origin of your Blazor app
+               .AllowAnyMethod()
+               .AllowAnyHeader());
+});
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -18,6 +29,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowedOrigin");
+app.UseRouting();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
