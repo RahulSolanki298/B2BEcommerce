@@ -70,13 +70,16 @@ namespace API.Controllers
                                 ShapeName = worksheet.Cells[row, 5].Text, // Column C
                                 CaratName = worksheet.Cells[row, 6].Text,
                                 CaratSize = worksheet.Cells[row, 7].Text,
-                                Sku = worksheet.Cells[row, 8].Text,
-                                Price = Convert.ToDecimal(worksheet.Cells[row, 9].Text),
-                                UnitPrice = Convert.ToDecimal(worksheet.Cells[row, 10].Text),
-                                Quantity = Convert.ToInt32(worksheet.Cells[row, 11].Text)
+                                ClarityName = worksheet.Cells[row, 8].Text,
+                                Sku = worksheet.Cells[row, 9].Text,
+                                Price = Convert.ToDecimal(worksheet.Cells[row, 10].Text),
+                                UnitPrice = Convert.ToDecimal(worksheet.Cells[row, 11].Text),
+                                Quantity = Convert.ToInt32(worksheet.Cells[row, 12].Text)
                             };
                             rows.Add(data);
                         }
+
+                        await _productRepo.SaveProductList(rows);
 
                     }
                 }

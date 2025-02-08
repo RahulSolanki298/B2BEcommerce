@@ -9,6 +9,6 @@ namespace Core.IRepository
 
         Task<Product> GetProductById(Guid id);
 
-        Task<bool> AddProductList(List<ProductVM> products);
+        Task<bool> SaveProductList(List<ProductVM> products);
     }
 }

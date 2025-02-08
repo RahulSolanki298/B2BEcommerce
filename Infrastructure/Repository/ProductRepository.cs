@@ -19,56 +19,105 @@ namespace Infrastructure.Repository
 
         public async Task<Product> GetProductById(Guid id) => await _context.Product.FirstOrDefaultAsync(x => x.Id == id);
 
-        public async Task<bool> AddProductList(List<ProductVM> products)
+        public async Task<bool> SaveProductList(List<ProductVM> products)
         {
+            // Step 1: Fetch all related entities in bulk to avoid repeated database calls
+            var colors = await _context.ProductColor.ToListAsync();
+            var categories = await _context.Category.ToListAsync();
+            var subCategories = await _context.SubCategory.ToListAsync();
+            var clarities = await _context.ProductClarity.ToListAsync();
+            var carats = await _context.ProductCarat.ToListAsync();
+            var caratSizes = await _context.ProductCaratSize.ToListAsync();
+            var shapes = await _context.ProductShape.ToListAsync();
+
+            // Step 2: Create dictionaries for fast lookup by Name
+            var colorDict = colors.ToDictionary(x => x.Name, x => x.Id);
+            var categoryDict = categories.ToDictionary(x => x.Name, x => x.Id);
+            var subCategoryDict = subCategories.ToDictionary(x => x.Name, x => x.Id);
+            var clarityDict = clarities.ToDictionary(x => x.Name, x => x.Id);
+            var caratDict = carats.ToDictionary(x => x.Name, x => x.Id);
+            var caratSizeDict = caratSizes.ToDictionary(x => x.Name, x => x.Id);
+            var shapeDict = shapes.ToDictionary(x => x.Name, x => x.Id);
+
+            // Lists for insert and update
             var productList = new List<Product>();
-            var productItem = new Product();
-            foreach (var product in products) { 
-                var colorId= _context.ProductColor.Where(x=>x.Name==product.ColorName).FirstOrDefault();
-                var categoryId= _context.Category.Where(x => x.Name == product.CategoryName).FirstOrDefault();
-                var subCategoryId= _context.SubCategory.Where(x => x.Name == product.SubCategoryName).FirstOrDefault();
-                var clarityId= _context.ProductClarity.Where(x => x.Name == product.ClarityName).FirstOrDefault();
-                var caratId= _context.ProductCarat.Where(x => x.Name == product.CaratName).FirstOrDefault();
-                var caratSizeId= _context.ProductCaratSize.Where(x => x.Name == product.CaratSize).FirstOrDefault();
-                var shapeId= _context.ProductShape.Where(x => x.Name == product.ShapeName).FirstOrDefault();
+            var updateList = new List<Product>();
 
-                var productDT= _context.Product.Where(x=>x.CategoryId.Equals(categoryId) 
-                                    && x.ClarityId.Equals(clarityId)
-                                    && x.SubCategoryId.Equals(subCategoryId)
-                                    && x.CaratId.Equals(caratId) 
-                                    && x.ColorId.Equals(colorId)
-                                    && x.CaratSizeId.Equals(caratSizeId)).FirstOrDefault();
+            // Step 3: Process each product
+            foreach (var product in products)
+            {
+                var colorId = colorDict.GetValueOrDefault(product.ColorName);
+                var categoryId = categoryDict.GetValueOrDefault(product.CategoryName);
+                var subCategoryId = subCategoryDict.GetValueOrDefault(product.SubCategoryName);
+                var clarityId = clarityDict.GetValueOrDefault(product.ClarityName);
+                var caratId = caratDict.GetValueOrDefault(product.CaratName);
+                var caratSizeId = caratSizeDict.GetValueOrDefault(product.CaratSize);
+                var shapeId = shapeDict.GetValueOrDefault(product.ShapeName);
 
-                if (productDT != null) 
+                // Check if a product already exists based on related field IDs
+                var existingProduct = await _context.Product
+                    .Where(x => x.CategoryId == categoryId
+                                && x.ClarityId == clarityId
+                                && x.SubCategoryId == subCategoryId
+                                && x.CaratId == caratId
+                                && x.ColorId == colorId
+                                && x.CaratSizeId == caratSizeId)
+                    .FirstOrDefaultAsync();
+
+                if (existingProduct != null)
                 {
-                    
+                    // Update existing product
+                    existingProduct.Title = $"{product.CategoryName} {product.ColorName} {product.CaratName} {product.ProductType}";
+                    existingProduct.Sku = product.Sku;
+                    existingProduct.Price = product.Price;
+                    existingProduct.UnitPrice = product.UnitPrice;
+                    existingProduct.Quantity = product.Quantity;
+                    existingProduct.ProductType = product.ProductType;
+                    existingProduct.ShapeId = shapeId;
+
+                    updateList.Add(existingProduct);
                 }
                 else
                 {
-                    productItem.Title = product.CategoryName + " " + product.ColorName + " " + product.CaratName + " " + product.ProductType;
-                    productItem.Sku= product.Sku;
-                    productItem.CategoryId = Convert.ToInt32(categoryId);
-                    productItem.SubCategoryId = Convert.ToInt32(subCategoryId);
-                    productItem.CaratSizeId = Convert.ToInt32(caratSizeId);
-                    productItem.CaratId = Convert.ToInt32(caratId);
-                    productItem.ClarityId = Convert.ToInt32(clarityId);
-                    productItem.ColorId = Convert.ToInt32(colorId);
-                    productItem.Price= product.Price;
-                    productItem.UnitPrice = product.UnitPrice;
-                    productItem.Quantity = product.Quantity;
-                    productItem.ProductType = product.ProductType;
-                    productItem.ShapeId = Convert.ToInt32(shapeId);
+                    // Insert new product
+                    var newProduct = new Product
+                    {
+                        Title = $"{product.CategoryName} {product.ColorName} {product.CaratName} {product.ProductType}",
+                        Sku = product.Sku,
+                        CategoryId = categoryId,
+                        SubCategoryId = subCategoryId,
+                        CaratSizeId = caratSizeId,
+                        CaratId = caratId,
+                        ClarityId = clarityId,
+                        ColorId = colorId,
+                        Price = product.Price,
+                        UnitPrice = product.UnitPrice,
+                        Quantity = product.Quantity,
+                        ProductType = product.ProductType,
+                        ShapeId = shapeId
+                    };
 
-
-                    productList.Add(productItem);
-                   
+                    productList.Add(newProduct);
                 }
-
             }
 
-            await _context.Product.AddRangeAsync(productList);
-            return false;
+            // Step 4: Bulk insert new products and update existing products
+            if (productList.Count > 0)
+            {
+                await _context.Product.AddRangeAsync(productList);
+            }
+
+            if (updateList.Count > 0)
+            {
+                _context.Product.UpdateRange(updateList);
+            }
+
+            // Step 5: Save changes to the database
+            await _context.SaveChangesAsync();
+
+            return true;
         }
+
 
 
 
