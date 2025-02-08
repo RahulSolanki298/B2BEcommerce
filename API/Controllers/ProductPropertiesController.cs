@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using API.ViewModals;
+﻿using API.ViewModals;
 using Core.Entities;
 using Core.IRepository;
 using Microsoft.AspNetCore.Authorization;
@@ -16,18 +15,24 @@ namespace API.Controllers
         private readonly IGenericRepository<ProductColor> _productColorRepo;
         private readonly IGenericRepository<ProductShapes> _productShapesRepo;
         private readonly IGenericRepository<ProductCarat> _productCaratRepo;
+        private readonly IGenericRepository<ProductCaratSize> _productCaratSizeRepo;
         private readonly IGenericRepository<Category> _productCategoryRepo;
+        private readonly IGenericRepository<SubCategory> _productSubCategoryRepo;
         public ProductPropertiesController(IGenericRepository<ProductClarity> productClarityRepo,
             IGenericRepository<ProductColor> productColorRepo,
             IGenericRepository<ProductShapes> productShapesRepo,
             IGenericRepository<ProductCarat> productCaratRepo,
-            IGenericRepository<Category> productCategoryRepo)
+            IGenericRepository<Category> productCategoryRepo,
+            IGenericRepository<SubCategory> productSubCategoryRepo,
+            IGenericRepository<ProductCaratSize> productCaratSizeRepo)
         {
             _productClarityRepo = productClarityRepo;
             _productColorRepo = productColorRepo;
             _productShapesRepo = productShapesRepo;
             _productCaratRepo = productCaratRepo;
             _productCategoryRepo = productCategoryRepo;
+            _productSubCategoryRepo = productSubCategoryRepo;
+            _productCaratSizeRepo = productCaratSizeRepo;
         }
 
         #region Clarity
@@ -602,6 +607,198 @@ namespace API.Controllers
 
         #endregion
 
+
+        #region Carats Size
+        /// <summary>
+        /// Carats
+        /// </summary>
+        /// <returns></returns>
+
+        [HttpGet("caratSize-list")]
+        public async Task<ActionResult> GetCaratSizeList()
+        {
+            try
+            {
+                var caratList = await _productCaratSizeRepo.ListAllAsync();
+                if (caratList == null || !caratList.Any())
+                {
+                    return NotFound("No carat size records found.");
+                }
+                return Ok(caratList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("caratSize/{caratSizeId}")]
+        public async Task<ActionResult> GetCaratSizeById(int caratSizeId)
+        {
+            try
+            {
+                var caratDT = await _productCaratSizeRepo.GetByIdAsync(caratSizeId);
+                if (caratDT == null)
+                {
+                    return NotFound("No carat size records found.");
+                }
+                return Ok(caratDT);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("caratSize/caratSizeName/{caratSizeName}")]
+        public async Task<ActionResult> GetCaratSizeByName(string caratSizeName)
+        {
+            if (!string.IsNullOrEmpty(caratSizeName))
+            {
+                return BadRequest("Invalid ID.");
+            }
+
+            try
+            {
+                var caratList = await _productCaratSizeRepo.ListAllAsync();
+                if (caratList.Count == 0)
+                {
+                    return NotFound($"Carat not found.");
+                }
+
+                var carat = caratList.Where(c => c.Name == caratSizeName).FirstOrDefault();
+
+                return Ok(carat);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("save-product-carat-size")]
+        public async Task<ActionResult<ApiResponse<ProductCaratSize>>> SaveProductCaratSize(ProductCaratSize productCarat)
+        {
+            // Validate the input
+            if (productCarat == null)
+            {
+                return BadRequest(new ApiResponse<ProductCaratSize>
+                {
+                    Success = false,
+                    Message = "Product carat size data is required."
+                });
+            }
+
+            if (string.IsNullOrEmpty(productCarat.Name))
+            {
+                return BadRequest(new ApiResponse<ProductCaratSize>
+                {
+                    Success = false,
+                    Message = "Invalid product carat size data: 'Name' cannot be empty."
+                });
+            }
+
+            try
+            {
+                // Update if the Id is greater than 0, otherwise add a new entry
+                if (productCarat.Id > 0)
+                {
+                    _productCaratSizeRepo.Update(productCarat);
+                }
+                else
+                {
+                    var caratList = await _productCaratSizeRepo.ListAllAsync();
+                    if (caratList.Count > 0)
+                    {
+                        if (caratList.Any(x => x.Name == productCarat.Name))
+                        {
+                            return BadRequest(new ApiResponse<ProductCaratSize>
+                            {
+                                Success = false,
+                                Message = "Carat size name already exists."
+                            });
+                        }
+
+                    }
+                    _productCaratSizeRepo.Add(productCarat);
+                }
+
+                // Save changes to the repository
+                _productCaratSizeRepo.SaveChanges();
+
+                // Retrieve the saved product carat object
+                var response = await _productCaratSizeRepo.GetByIdAsync(productCarat.Id);
+                if (response == null)
+                {
+                    return NotFound(new ApiResponse<ProductCaratSize>
+                    {
+                        Success = false,
+                        Message = "Failed to save product carat.",
+                    });
+                }
+
+                // Return success response
+                return Ok(new ApiResponse<ProductCaratSize>
+                {
+                    Success = true,
+                    Message = "Product carat size saved successfully.",
+                    Data = response
+                });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (consider adding a logging mechanism here)
+                return StatusCode(500, new ApiResponse<ProductCaratSize>
+                {
+                    Success = false,
+                    Message = $"Internal server error: {ex.Message}",
+                });
+            }
+        }
+
+        [HttpDelete("delete-caratSize/caratSizeId/{caratSizeId}")]
+        public async Task<ActionResult<ApiResponse<ProductCaratSize>>> DeleteCaratSize(int caratSizeId)
+        {
+            // Step 1: Validate if the ProductColor exists with the provided caratId
+            var productCaratSize = await _productCaratSizeRepo.GetByIdAsync(caratSizeId);
+
+            if (productCaratSize == null)
+            {
+                // If the clarityId doesn't exist, return a Not Found response
+                return NotFound(new ApiResponse<ProductCarat>
+                {
+                    Success = false,
+                    Message = $"Product carat size with ID {caratSizeId} not found."
+                });
+            }
+
+            try
+            {
+                // Step 2: Delete the ProductClarity object
+                _productCaratSizeRepo.Delete(productCaratSize);
+                _productCaratSizeRepo.SaveChanges();
+
+                // Step 3: Return success response
+                return Ok(new ApiResponse<ProductCaratSize>
+                {
+                    Success = true,
+                    Message = "Product carat size deleted successfully.",
+                    Data = productCaratSize
+                });
+            }
+            catch (Exception ex)
+            {
+                // If any exception occurs during the delete operation, return a 500 error
+                return StatusCode(500, new ApiResponse<ProductCaratSize>
+                {
+                    Success = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }
+
+        #endregion
+
         #region Shapes
         /// <summary>
         /// Shapes
@@ -813,16 +1010,295 @@ namespace API.Controllers
         [HttpGet("category/categoryName/{categoryName}")]
         public async Task<ActionResult> GetCategoryByName(string categoryName)
         {
-            var response = await _productCategoryRepo.ListAllAsync();
-            var category= response.Where(x=>x.Name == categoryName).FirstOrDefault();
-            if (category != null)
+            // Query the database directly instead of fetching all categories and filtering in memory
+            var categoryList = await _productCategoryRepo.ListAllAsync();
+            var category = categoryList.FirstOrDefault(x => x.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase));
+
+            // Check if the category was found
+            if (category == null)
             {
-                return BadRequest("Category name already exist.");
+                return NotFound(new { Message = $"Category with name '{categoryName}' not found." });
             }
+
+            // Return the found category with a 200 OK status
             return Ok(category);
+        }
+
+        [HttpPost("save-category")]
+        public async Task<ActionResult<ApiResponse<Category>>> SaveProductCategory(Category category)
+        {
+            // Validate the input
+            if (category == null)
+            {
+                return BadRequest(new ApiResponse<Category>
+                {
+                    Success = false,
+                    Message = "Category data is required."
+                });
+            }
+
+            if (string.IsNullOrEmpty(category.Name))
+            {
+                return BadRequest(new ApiResponse<Category>
+                {
+                    Success = false,
+                    Message = "Invalid category data: 'Name' cannot be empty."
+                });
+            }
+
+            try
+            {
+                // Update if the Id is greater than 0, otherwise add a new entry
+                if (category.Id > 0)
+                {
+                    _productCategoryRepo.Update(category);
+                }
+                else
+                {
+                    var categoryList = await _productCategoryRepo.ListAllAsync();
+                    if (categoryList.Count > 0)
+                    {
+                        var catResponse = categoryList.Where(x => x.Name == category.Name).FirstOrDefault();
+                        if (catResponse != null)
+                        {
+                            return BadRequest(new ApiResponse<Category>
+                            {
+                                Success = false,
+                                Message = "Category name already exists."
+                            });
+                        }
+                    }
+                    _productCategoryRepo.Add(category);
+                }
+
+                // Save changes to the repository
+                _productCategoryRepo.SaveChanges();
+
+                // Retrieve the saved product shape object
+                var response = await _productCategoryRepo.GetByIdAsync(category.Id);
+                if (response == null)
+                {
+                    return NotFound(new ApiResponse<Category>
+                    {
+                        Success = false,
+                        Message = "Failed to save product category."
+                    });
+                }
+
+                // Return success response
+                return Ok(new ApiResponse<Category>
+                {
+                    Success = true,
+                    Message = "Product category saved successfully.",
+                    Data = response
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<Category>
+                {
+                    Success = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }
+
+        [HttpDelete("delete-category/categoryId/{categoryId}")]
+        public async Task<ActionResult<ApiResponse<ProductShapes>>> DeleteCategory(int categoryId)
+        {
+            // Step 1: Validate if the ProductShape exists with the provided shapeId
+            var productCategory = await _productCategoryRepo.GetByIdAsync(categoryId);
+
+            if (productCategory == null)
+            {
+                // If the clarityId doesn't exist, return a Not Found response
+                return NotFound(new ApiResponse<Category>
+                {
+                    Success = false,
+                    Message = $"Product Category with ID {categoryId} not found."
+                });
+            }
+
+            try
+            {
+                // Step 2: Delete the ProductClarity object
+                _productCategoryRepo.Delete(productCategory);
+                _productCategoryRepo.SaveChanges();
+
+                // Step 3: Return success response
+                return Ok(new ApiResponse<Category>
+                {
+                    Success = true,
+                    Message = "Product category deleted successfully.",
+                    Data = productCategory
+                });
+            }
+            catch (Exception ex)
+            {
+                // If any exception occurs during the delete operation, return a 500 error
+                return StatusCode(500, new ApiResponse<Category>
+                {
+                    Success = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
         }
 
         #endregion
 
+        #region Sub Category
+
+        [HttpGet("subcategory-list")]
+        public async Task<ActionResult> GetSubCategoryList()
+        {
+            var response = await _productSubCategoryRepo.ListAllAsync();
+            return Ok(response);
+        }
+
+        [HttpGet("subcategory/subCategoryId/{subCategoryId}")]
+        public async Task<ActionResult> GetSubCategory(int subCategoryId)
+        {
+            var response = await _productSubCategoryRepo.GetByIdAsync(subCategoryId);
+            return Ok(response);
+        }
+
+        [HttpGet("subCategory/subCategoryName/{subCategoryName}")]
+        public async Task<ActionResult> GetSubCategoryByName(string subCategoryName)
+        {
+            // Query the database directly instead of fetching all categories and filtering in memory
+            var subCategoryList = await _productSubCategoryRepo.ListAllAsync();
+            var subCategory = subCategoryList.FirstOrDefault(x => x.Name.Equals(subCategoryName, StringComparison.OrdinalIgnoreCase));
+
+            // Check if the category was found
+            if (subCategory == null)
+            {
+                return NotFound(new { Message = $"SubCategory with name '{subCategoryName}' not found." });
+            }
+
+            // Return the found category with a 200 OK status
+            return Ok(subCategory);
+        }
+
+        [HttpPost("save-subCategory")]
+        public async Task<ActionResult<ApiResponse<SubCategory>>> SaveSubCategory(SubCategory subCategory)
+        {
+            // Validate the input
+            if (subCategory == null)
+            {
+                return BadRequest(new ApiResponse<SubCategory>
+                {
+                    Success = false,
+                    Message = "Sub category data is required."
+                });
+            }
+
+            if (string.IsNullOrEmpty(subCategory.Name))
+            {
+                return BadRequest(new ApiResponse<SubCategory>
+                {
+                    Success = false,
+                    Message = "Invalid Sub category data: 'Name' cannot be empty."
+                });
+            }
+
+            try
+            {
+                // Update if the Id is greater than 0, otherwise add a new entry
+                if (subCategory.Id > 0)
+                {
+                    _productSubCategoryRepo.Update(subCategory);
+                }
+                else
+                {
+                    var subCategoryList = await _productSubCategoryRepo.ListAllAsync();
+                    if (subCategoryList.Count > 0)
+                    {
+                        var subCatResponse = subCategoryList.Where(x => x.Name == subCategory.Name).FirstOrDefault();
+                        if (subCatResponse != null)
+                        {
+                            return BadRequest(new ApiResponse<SubCategory>
+                            {
+                                Success = false,
+                                Message = "Sub category name already exists."
+                            });
+                        }
+                    }
+                    _productSubCategoryRepo.Add(subCategory);
+                }
+
+                // Save changes to the repository
+                _productSubCategoryRepo.SaveChanges();
+
+                // Retrieve the saved product shape object
+                var response = await _productSubCategoryRepo.GetByIdAsync(subCategory.Id);
+                if (response == null)
+                {
+                    return NotFound(new ApiResponse<SubCategory>
+                    {
+                        Success = false,
+                        Message = "Failed to save product sub-category."
+                    });
+                }
+
+                // Return success response
+                return Ok(new ApiResponse<SubCategory>
+                {
+                    Success = true,
+                    Message = "Product sub category saved successfully.",
+                    Data = response
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<SubCategory>
+                {
+                    Success = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }
+
+        [HttpDelete("delete-subCategory/subCategoryId/{subCategoryId}")]
+        public async Task<ActionResult<ApiResponse<SubCategory>>> DeleteSubCategory(int subCategoryId)
+        {
+            // Step 1: Validate if the ProductShape exists with the provided shapeId
+            var productSubCategory = await _productSubCategoryRepo.GetByIdAsync(subCategoryId);
+
+            if (productSubCategory == null)
+            {
+                // If the clarityId doesn't exist, return a Not Found response
+                return NotFound(new ApiResponse<SubCategory>
+                {
+                    Success = false,
+                    Message = $"Product Sub Category with ID {subCategoryId} not found."
+                });
+            }
+
+            try
+            {
+                // Step 2: Delete the ProductClarity object
+                _productSubCategoryRepo.Delete(productSubCategory);
+                _productSubCategoryRepo.SaveChanges();
+
+                // Step 3: Return success response
+                return Ok(new ApiResponse<SubCategory>
+                {
+                    Success = true,
+                    Message = "Product sub category deleted successfully.",
+                    Data = productSubCategory
+                });
+            }
+            catch (Exception ex)
+            {
+                // If any exception occurs during the delete operation, return a 500 error
+                return StatusCode(500, new ApiResponse<SubCategory>
+                {
+                    Success = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }
+
+        #endregion
     }
 }

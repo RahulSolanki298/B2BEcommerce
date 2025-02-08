@@ -40,5 +40,7 @@ namespace Infrastructure.Data
 
         public DbSet<SubCategory> SubCategory { get; set; }
 
+        public DbSet<ProductCaratSize> ProductCaratSize { get; set; }
+
     }
 }
