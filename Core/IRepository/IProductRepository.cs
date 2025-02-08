@@ -1,4 +1,5 @@
 ﻿using Core.Entities;
+using Core.ViewModels;
 
 namespace Core.IRepository
 {
@@ -7,5 +8,7 @@ namespace Core.IRepository
         Task<IReadOnlyList<Product>> GetProductList();
 
         Task<Product> GetProductById(Guid id);
+
+        Task<bool> AddProductList(List<ProductVM> products);
     }
 }
