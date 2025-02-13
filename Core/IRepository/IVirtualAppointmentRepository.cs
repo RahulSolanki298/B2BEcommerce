@@ -1,12 +1,13 @@
 ﻿using Core.Entities;
+using Core.ViewModals;
 
 namespace Core.IRepository
 {
     public interface IVirtualAppointmentRepository
     {
-        Task<IReadOnlyList<VirtualAppointment>> GetVirtualAppointmentListAsync();
+        Task<IReadOnlyList<VirtualAppointmentVM>> GetVirtualAppointmentListAsync();
 
-        Task<VirtualAppointment> GetVirtualAppointmentAsync(int id);
+        Task<VirtualAppointmentVM> GetVirtualAppointmentAsync(int id);
 
         Task<VirtualAppointment> SaveVirtualAppointment(VirtualAppointment virtualAppointment);
 

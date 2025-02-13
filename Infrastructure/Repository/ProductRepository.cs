@@ -43,24 +43,38 @@ namespace Infrastructure.Repository
             var productList = new List<Product>();
             var updateList = new List<Product>();
 
+            int colorId, subCategoryId, categoryId, clarityId, caratId, caratSizeId, shapeId = 0;
+
             // Step 3: Process each product
             foreach (var product in products)
             {
-                var colorId = colorDict.GetValueOrDefault(product.ColorName);
-                var categoryId = categoryDict.GetValueOrDefault(product.CategoryName);
-                var subCategoryId = subCategoryDict.GetValueOrDefault(product.SubCategoryName);
-                var clarityId = clarityDict.GetValueOrDefault(product.ClarityName);
-                var caratId = caratDict.GetValueOrDefault(product.CaratName);
-                var caratSizeId = caratSizeDict.GetValueOrDefault(product.CaratSize);
-                var shapeId = shapeDict.GetValueOrDefault(product.ShapeName);
+                if (string.IsNullOrEmpty(product.ColorName)
+                    || string.IsNullOrEmpty(product.CategoryName)
+                    || string.IsNullOrEmpty(product.SubCategoryName)
+                    || string.IsNullOrEmpty(product.ClarityName)
+                    || string.IsNullOrEmpty(product.CaratName)
+                    || string.IsNullOrEmpty(product.CaratSize)
+                    || string.IsNullOrEmpty(product.ShapeName))
+                {
+                    continue;
+                }
+
+                colorId = colorDict.GetValueOrDefault(product.ColorName);
+                categoryId = categoryDict.GetValueOrDefault(product.CategoryName);
+                subCategoryId = subCategoryDict.GetValueOrDefault(product.SubCategoryName);
+                clarityId = clarityDict.GetValueOrDefault(product.ClarityName);
+                caratId = caratDict.GetValueOrDefault(product.CaratName);
+                caratSizeId = caratSizeDict.GetValueOrDefault(product.CaratSize);
+                shapeId = shapeDict.GetValueOrDefault(product.ShapeName);
 
                 // Check if a product already exists based on related field IDs
                 var existingProduct = await _context.Product
-                    .Where(x => x.CategoryId == categoryId
-                                && x.ClarityId == clarityId
+                    .Where(x => x.ProductType == product.ProductType
+                                && x.CategoryId == categoryId
                                 && x.SubCategoryId == subCategoryId
-                                && x.CaratId == caratId
+                                && x.ClarityId == clarityId
                                 && x.ColorId == colorId
+                                && x.CaratId == caratId
                                 && x.CaratSizeId == caratSizeId)
                     .FirstOrDefaultAsync();
 
@@ -72,8 +86,6 @@ namespace Infrastructure.Repository
                     existingProduct.Price = product.Price;
                     existingProduct.UnitPrice = product.UnitPrice;
                     existingProduct.Quantity = product.Quantity;
-                    existingProduct.ProductType = product.ProductType;
-                    existingProduct.ShapeId = shapeId;
 
                     updateList.Add(existingProduct);
                 }

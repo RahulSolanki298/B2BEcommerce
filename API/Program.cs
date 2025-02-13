@@ -1,4 +1,3 @@
-using System.Text;
 using Core.Entities;
 using Core.IRepository;
 using Infrastructure.Data;
@@ -6,8 +5,8 @@ using Infrastructure.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +15,7 @@ builder.Services.AddControllers();
 
 // Database Context Configuration
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Identity Setup
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -38,7 +37,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["Token:Audience"],
             ValidateLifetime = true,
             IssuerSigningKey = new SymmetricSecurityKey(key),
-            ClockSkew = TimeSpan.Zero // Optional: Adjust time drift tolerance
+            ClockSkew = TimeSpan.FromMinutes(5) // 5-minute clock skew tolerance
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                context.Response.Headers.Add("Token-Error", "Authentication failed");
+                return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                context.Response.Headers.Add("Token-Error", "Authorization failed");
+                return Task.CompletedTask;
+            },
         };
     });
 
@@ -46,9 +59,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
+    options.AddPolicy("SuppliersOnly", policy => policy.RequireRole("Suppliers"));
 });
-
 
 // Dependency Injection for Generic Repository
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -59,7 +71,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS Setup (with external configuration options)
+// CORS Setup
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>

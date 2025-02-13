@@ -1,5 +1,6 @@
 ﻿using Core.Entities;
 using Core.IRepository;
+using Core.ViewModals;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,13 +15,52 @@ namespace Infrastructure.Repository
             _context = context;
         }
 
-        public async Task<IReadOnlyList<VirtualAppointment>> GetVirtualAppointmentListAsync() => await _context.VirtualAppointment.ToListAsync();
+        public async Task<IReadOnlyList<VirtualAppointmentVM>> GetVirtualAppointmentListAsync() 
+        {
+            var responses= await (from vm in _context.VirtualAppointment
+                           join cat in _context.Category on vm.CategoryId equals cat.Id
+                           select new VirtualAppointmentVM
+                           {
+                               Id = vm.Id,
+                               CategoryId=vm.CategoryId,
+                               CategoryName=cat.Name,
+                               CompanyName=vm.CompanyName,
+                               EmailId=vm.EmailId,
+                               FirstName=vm.FirstName,
+                               LastName=vm.LastName,
+                               Message=vm.Message,
+                               RegisterDate=vm.RegisterDate,
+                               RegisterTime=vm.RegisterTime,
+                               Status = vm.Status
+                           }).ToListAsync();
 
-        public async Task<VirtualAppointment> GetVirtualAppointmentAsync(int id) => await _context.VirtualAppointment.FirstOrDefaultAsync(x=>x.Id == id);
+            return responses;
+            
+        }
+
+        public async Task<VirtualAppointmentVM> GetVirtualAppointmentAsync(int id)
+        {
+            return await (from vm in _context.VirtualAppointment
+                                   join cat in _context.Category on vm.CategoryId equals cat.Id
+                                   select new VirtualAppointmentVM
+                                   {
+                                       Id = vm.Id,
+                                       CategoryId = vm.CategoryId,
+                                       CategoryName = cat.Name,
+                                       CompanyName = vm.CompanyName,
+                                       EmailId = vm.EmailId,
+                                       FirstName = vm.FirstName,
+                                       LastName = vm.LastName,
+                                       Message = vm.Message,
+                                       RegisterDate = vm.RegisterDate,
+                                       RegisterTime = vm.RegisterTime,
+                                       Status = vm.Status
+                                   }).FirstOrDefaultAsync(x=>x.Id == id);
+        }
 
         public async Task<bool> DeleteVirtualAppointmentAsync(int id)
         {
-            var result = await GetVirtualAppointmentAsync(id);
+            var result = await _context.VirtualAppointment.FindAsync(id);
 
             if (result != null) { 
                 _context.VirtualAppointment.Remove(result);

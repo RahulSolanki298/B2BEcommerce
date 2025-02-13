@@ -1,13 +1,17 @@
-﻿namespace Core.Entities
+﻿namespace API.ViewModals
 {
-    public class VirtualAppointment : BaseEntity
+    public class VirtualAppointmentVM
     {
+        public int Id { get; set; }
+
         public string CompanyName { get; set; }
 
         // Jewelry like [Ring, Earrings]
         public int CategoryId { get; set; }
 
-        public DateTime RegisterDate { get; set; }
+        public string CategoryName { get; set; }
+
+        public DateTime? RegisterDate { get; set; }
 
         public string RegisterTime { get; set; } //  hh:mm
 

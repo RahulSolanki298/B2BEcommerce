@@ -1,10 +1,12 @@
 ﻿using API.ViewModals;
 using Core.Entities;
 using Core.IRepository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class VirtualAppointmentController : ControllerBase
@@ -84,7 +86,7 @@ namespace API.Controllers
 
 
         [HttpDelete("VirtualAppointment/{id}")]
-        public async Task<ActionResult<ApiResponse<VirtualAppointment>>> DeleteVirtualAppointment(int id)
+        public async Task<ActionResult<ApiResponse<VirtualAppointmentVM>>> DeleteVirtualAppointment(int id)
         {
             // Step 1: Retrieve the appointment by ID
             var appointment = await _virtualAppointmentRepository.GetVirtualAppointmentAsync(id);
@@ -100,7 +102,7 @@ namespace API.Controllers
 
             if (result)
             {
-                return Ok(new ApiResponse<VirtualAppointment> { Success = true, Message = "Virtual Appointment deleted successfully", Data = appointment });
+                return Ok(new ApiResponse<VirtualAppointmentVM> { Success = true, Message = "Virtual Appointment deleted successfully" });
             }
             else
             {

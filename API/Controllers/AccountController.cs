@@ -1,7 +1,7 @@
-﻿using API.ViewModals;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using API.ViewModals;
 using Core.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,8 +18,8 @@ namespace API.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
 
-        public AccountController(UserManager<ApplicationUser> userManager, 
-            SignInManager<ApplicationUser> signInManager, 
+        public AccountController(UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             IConfiguration configuration,
             RoleManager<IdentityRole> roleManager)
         {
@@ -53,7 +53,7 @@ namespace API.Controllers
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 Email = model.UserName,
-                TextPassword=model.Password
+                TextPassword = model.Password
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -75,6 +75,7 @@ namespace API.Controllers
                 Token = token
             });
         }
+
 
         [HttpPost("admin-login")]
         public async Task<ActionResult> AdminLogin([FromBody] AdminLoginModel model)
@@ -115,6 +116,20 @@ namespace API.Controllers
                 Token = token
             });
         }
+
+        [HttpPost("logout")]
+        public async Task<ActionResult> Logout()
+        {
+            // Sign the user out
+            await _signInManager.SignOutAsync();
+
+            return Ok(new
+            {
+                Success = true,
+                Message = "User logged out successfully."
+            });
+        }
+
 
         private async Task<string> GenerateJwtToken(ApplicationUser user)
         {

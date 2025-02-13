@@ -461,14 +461,14 @@ namespace API.Controllers
         [HttpGet("carat/caratName/{caratName}")]
         public async Task<ActionResult> GetCaratByName(string caratName)
         {
-            if (!string.IsNullOrEmpty(caratName))
+            if (string.IsNullOrEmpty(caratName))
             {
-                return BadRequest("Invalid ID.");
+                return BadRequest("Invalid Carat Name.");
             }
 
             try
             {
-                var caratList = await _productColorRepo.ListAllAsync();
+                var caratList = await _productCaratRepo.ListAllAsync();
                 if (caratList.Count == 0)
                 {
                     return NotFound($"Carat not found.");
@@ -606,7 +606,6 @@ namespace API.Controllers
         }
 
         #endregion
-
 
         #region Carats Size
         /// <summary>
@@ -1300,5 +1299,19 @@ namespace API.Controllers
         }
 
         #endregion
+
+        #region Product Types
+
+        [HttpGet("product-types")]
+        public ActionResult GetProductType()
+        {
+            var productType = new List<string>();
+            productType.Add("Diamond");
+            productType.Add("Gold");
+            return Ok(productType);
+        }
+
+
+        #endregion  
     }
 }
