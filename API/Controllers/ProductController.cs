@@ -1,7 +1,12 @@
-﻿using Core.IRepository;
+﻿using System.IO.Compression;
+using API.ViewModals;
+using Core.Entities;
+using Core.IRepository;
 using Core.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 
 namespace API.Controllers
@@ -33,7 +38,7 @@ namespace API.Controllers
             return Ok(response);
         }
 
-        [HttpPost("upload")]
+        [HttpPost("BulkProductUpload")]
         public async Task<IActionResult> UploadExcel(IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -93,5 +98,54 @@ namespace API.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpPost("BulkProductImagesUpload")]
+        public async Task<IActionResult> UploadProductImages(IFormFile zipFile)
+        {
+            string fileName=string.Empty;
+            string[] fileNameParts;
+            string productType, category, color, shape, indexNumber, ext;
+
+            if (zipFile == null || zipFile.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            var extractedFolder = Path.Combine("UploadedFiles", "Temp");  // Temporary folder for extraction
+            Directory.CreateDirectory(extractedFolder);
+
+            // Save ZIP to disk temporarily
+            var zipPath = Path.Combine(extractedFolder, zipFile.FileName);
+            using (var fileStream = new FileStream(zipPath, FileMode.Create))
+            {
+                await zipFile.CopyToAsync(fileStream);
+            }
+
+            // Extract images from the ZIP file
+            ZipFile.ExtractToDirectory(zipPath, extractedFolder);
+
+            var files = Directory.GetFiles(extractedFolder);
+
+            foreach (var file in files)
+            {
+                fileName = Path.GetFileName(file);
+
+                fileNameParts = fileName.Split('_');
+                
+                if (fileNameParts.Length != 4) continue;
+
+                productType = fileNameParts[0];
+                category = fileNameParts[1];
+                color = fileNameParts[2];
+                shape = fileNameParts[3];
+                indexNumber= Path.GetFileNameWithoutExtension(fileName);
+                ext= Path.GetExtension(fileName);
+
+                
+                
+                
+            }
+
+            return Ok("Images uploaded and organized successfully.");
+        }
+
     }
 }

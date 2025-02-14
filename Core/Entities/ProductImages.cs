@@ -10,6 +10,8 @@
 
         public int? ImageSmId { get; set; }
 
+        public int ImageIndexNumber { get; set; } = 0;
+
         public int? VideoId { get; set; }
 
         public bool IsDefault { get; set; }

@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using API.Helpers;
 using API.ViewModals;
 using Core.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -50,10 +51,18 @@ namespace API.Controllers
             var user = new ApplicationUser
             {
                 UserName = model.UserName,
+                NormalizedUserName = model.UserName.ToUpper(),
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 Email = model.UserName,
-                TextPassword = model.Password
+                TextPassword = model.Password,
+                AadharCardNo = model.AadharCardNo,
+                PancardNo = model.PancardNo,
+                Gender = model.Gender,
+                PhoneNumber = model.PhoneNumber,
+                MiddleName = model.MiddleName,
+                NormalizedEmail = model.UserName.ToUpper(),
+                ActivationStatus = SD.Activated
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -89,25 +98,37 @@ namespace API.Controllers
             var user = await _userManager.FindByNameAsync(model.UserName);
             if (user == null)
             {
-                return Unauthorized("Invalid username or password.");
+                return Unauthorized("Invalid username.");
             }
 
-            // Check if the user is an admin by checking their role
+            // Check if the user is an admin or a supplier
             var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
-            if (!isAdmin)
+            var isSupplier = await _userManager.IsInRoleAsync(user, "Suppliers");
+
+            if (!isAdmin && !isSupplier)
             {
-                return Unauthorized("You are not authorized to login as an admin.");
+                return Unauthorized("You are not authorized to login as an admin or supplier.");
             }
 
             // Validate the password
             var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
             if (!result.Succeeded)
             {
-                return Unauthorized("Invalid username or password.");
+                return Unauthorized("Invalid password.");
             }
 
-            // Generate the JWT token
-            var token = await GenerateJwtToken(user);
+            // Generate the JWT token and handle any potential errors
+            string token;
+            try
+            {
+                token = await GenerateJwtToken(user);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+
+                return StatusCode(500, "An error occurred while generating the token.");
+            }
 
             return Ok(new
             {
@@ -116,6 +137,7 @@ namespace API.Controllers
                 Token = token
             });
         }
+
 
         [HttpPost("logout")]
         public async Task<ActionResult> Logout()

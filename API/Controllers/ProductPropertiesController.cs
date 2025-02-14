@@ -42,7 +42,7 @@ namespace API.Controllers
         /// <returns></returns>
         /// 
 
-        [Authorize(Policy = "AdminOnly")]
+        //[Authorize(Policy = "AdminOnly")]
         [HttpGet("clarity-list")]
         public async Task<ActionResult> GetClarityList()
         {

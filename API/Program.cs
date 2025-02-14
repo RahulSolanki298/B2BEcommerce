@@ -66,6 +66,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IVirtualAppointmentRepository, VirtualAppointmentRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
 
 // Swagger and API Explorer
 builder.Services.AddEndpointsApiExplorer();
