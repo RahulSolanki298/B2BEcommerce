@@ -1,0 +1,63 @@
+﻿@page "/applications/virtualAppointment/editAppointment/{Id:int}"
+@using System.Globalization;
+@inject VirtualAppointmentServices appointmentService
+
+@using AdminDashboard.Server.Services
+@using AdminDashboard.Server.ViewModals
+
+<h3>@(Id == 0 ? "Create" : "Edit") Appointment</h3>
+
+<EditForm Model="@virtualAppointment">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <MudTextField Label="Company Name" @bind-Value="virtualAppointment.CompanyName" Required="true" />
+
+    <MudTextField Label="First Name" @bind-Value="virtualAppointment.FirstName" Required="true" />
+
+    <MudTextField Label="Last Name" @bind-Value="virtualAppointment.LastName" Required="true" />
+
+    <MudTextField Label="Email Id" @bind-Value="virtualAppointment.EmailId" Required="true" Type="Email" />
+
+    @* 
+        <MudSelect T="int" Label="Category" @bind-Value="virtualAppointment.CategoryId" Required="true">
+            <MudSelectItem T="int" Value="1">Ring</MudSelectItem>
+            <MudSelectItem T="int" Value="2">Earrings</MudSelectItem>
+        </MudSelect>
+    *@
+
+    <MudTextField Label="Message" @bind-Value="virtualAppointment.Message" Required="true" />
+
+    <MudDatePicker Label="Register Date(dd.MM.yyyy)" Editable="true" @bind-Date="virtualAppointment.RegisterDate" DateFormat="dd.MM.yyyy" Placeholder="de-AT Date" Variant="Variant.Text" />
+
+    <MudTimePicker Label="Register Time (hh:mm tt)" @bind-Value="virtualAppointment.RegisterTime" TimeFormat="hh:mm tt" Placeholder="de-AT Time" Variant="Variant.Text" />
+
+    @* <label>Status</label>
+    <select @bind="virtualAppointment.Status">
+        <option>Requested</option>
+        <option>Accepted</option>
+        <option>Rejected</option>
+    </select> *@
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Type="Submit">@((Id == 0 ? "Create" : "Update") + " Appointment")</MudButton>
+</EditForm>
+
+@code {
+    CultureInfo en = @CultureInfo.GetCultureInfo("en-US");
+    CultureInfo de = CultureInfo.GetCultureInfo("de-AT");
+    CultureInfo cn = CultureInfo.GetCultureInfo("zh-CN");
+    DateTime date = DateTime.Now;
+
+    [Parameter] public int Id { get; set; } = 0;
+    private VirtualAppointmentVM virtualAppointment = new VirtualAppointmentVM();
+    
+    protected override async Task OnInitializedAsync()
+        {
+        if (Id != 0)
+        {
+            // Editing an existing appointment, fetch the details by Id
+            virtualAppointment = await appointmentService.GetVirtualAppointmentById(Id);
+
+        }
+    }
+}

@@ -1,0 +1,33 @@
+﻿@page "/applications/virtualAppointment/appointments"
+
+@using AdminDashboard.Server.ViewModals
+@using System.Net.Http.Json
+@using AdminDashboard.Server.Services
+
+@inject VirtualAppointmentServices _AppointmentService
+
+<MudItem xs="12" sm="12" md="12">
+    <MudCard Elevation="25" Style="height:100%;">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Virtual Appointment List</MudText>
+                <div Class="d-flex justify-space-between align-right">
+                    <MudLink Href="applications/virtualAppointment/createAppointment">Add Virtual Appointment</MudLink>
+                </div>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent Class="px-0">
+            
+        </MudCardContent>
+    </MudCard>
+</MudItem>
+
+@code {
+    private IReadOnlyList<VirtualAppointmentVM> VirtualAppointmentList = new List<VirtualAppointmentVM>();
+
+    protected override async Task OnInitializedAsync()
+    {
+    }
+
+    
+}

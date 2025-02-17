@@ -1,0 +1,85 @@
+﻿@page "/applications/virtualAppointment/createAppointment"
+@using AdminDashboard.Server.Services
+@using AdminDashboard.Server.ViewModals
+@inject VirtualAppointmentServices appointmentService
+
+<MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-4">Virtual Appointment</MudText>
+<EditForm Model="@virtualAppointment" OnValidSubmit="SubmitVirtualAppointment" OnInvalidSubmit="HandleInvalidSubmit">
+
+	<MudGrid>
+		<MudCard>
+			<DataAnnotationsValidator />
+			<ValidationSummary />
+			<MudCardHeader>
+				<MudText>Create Appointment</MudText>
+			</MudCardHeader>
+
+			<MudCardContent>
+				<MudGrid>
+					<MudItem xs="12">
+						<input type="hidden" @bind-value="virtualAppointment.Id" FullWidth />
+						<MudTextField Label="Company Name" @bind-Value="virtualAppointment.CompanyName" Required="true" FullWidth />
+					</MudItem>
+
+					<MudItem xs="12" sm="6">
+						<MudTextField Label="First Name" @bind-Value="virtualAppointment.FirstName" Required="true" FullWidth />
+					</MudItem>
+
+					<MudItem xs="12" sm="6">
+						<MudTextField Label="Last Name" @bind-Value="virtualAppointment.LastName" Required="true" FullWidth />
+					</MudItem>
+
+					<MudItem xs="12" sm="6">
+						<MudTextField Label="Email Id" @bind-Value="virtualAppointment.EmailId" Required="true" Type="Email" FullWidth />
+					</MudItem>
+
+					<MudItem xs="12">
+						<MudTextField Label="Message" @bind-Value="virtualAppointment.Message" Required="true" FullWidth />
+					</MudItem>
+
+					<MudItem xs="12" sm="6">
+						<MudDatePicker Label="Register Date (dd.MM.yyyy)" @bind-Date="virtualAppointment.RegisterDate" DateFormat="dd.MM.yyyy" Placeholder="Date" FullWidth />
+					</MudItem>
+
+					<MudItem xs="12" sm="6">
+						<MudTimePicker Label="Register Time (hh:mm tt)" @bind-Value="virtualAppointment.RegisterTime" TimeFormat="hh:mm tt" Placeholder="Time" FullWidth />
+					</MudItem>
+				</MudGrid>
+			</MudCardContent>
+
+			<MudCardActions Class="d-flex justify-content-end pb-4 pl-4">
+				@* <MudButton Variant="Variant.Filled" Color="Color.Primary" Type="Submit">
+						Create Appointment
+					</MudButton> *@
+				<button class="btn btn-primary" type="submit">Create Appointment</button>
+			</MudCardActions>
+		</MudCard>
+	</MudGrid>
+</EditForm>
+
+@code {
+
+	private VirtualAppointmentVM virtualAppointment = new VirtualAppointmentVM();
+
+	protected override async Task OnInitializedAsync()
+	{
+		virtualAppointment = new VirtualAppointmentVM();
+	}
+
+	private async Task SubmitVirtualAppointment()
+	{
+		Console.WriteLine("Appointment saved!");
+	}
+
+	// Called when the form is invalid
+	private async Task HandleInvalidSubmit()
+	{
+		await appointmentService.SaveAndUpdateData(virtualAppointment);
+	}
+
+	// Save button logic
+	private async Task SaveAppointment()
+	{
+		Console.WriteLine("Appointment saved!");
+	}
+}
