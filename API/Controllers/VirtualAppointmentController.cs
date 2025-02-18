@@ -18,13 +18,15 @@ namespace API.Controllers
         }
 
         [HttpGet("VirtualAppoimentList")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> GetVirtualAppoimentList()
         {
             var response = await _virtualAppointmentRepository.GetVirtualAppointmentListAsync();
             return Ok(response);
         }
 
-        [HttpGet("VirtualAppoiment/AppointmentById/{id}")]
+        [HttpGet("AppointmentById/{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> GetVirtualAppoiment(int id)
         {
             var response = await _virtualAppointmentRepository.GetVirtualAppointmentAsync(id);
@@ -86,6 +88,7 @@ namespace API.Controllers
 
 
         [HttpDelete("VirtualAppointment/{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<ApiResponse<VirtualAppointmentVM>>> DeleteVirtualAppointment(int id)
         {
             // Step 1: Retrieve the appointment by ID

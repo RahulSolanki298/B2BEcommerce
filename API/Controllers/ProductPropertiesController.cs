@@ -1000,7 +1000,7 @@ namespace API.Controllers
         }
 
         [HttpGet("category/categoryId/{categoryId}")]
-        public async Task<ActionResult> GetCategory(int categoryId)
+        [Authorize(Roles = "admin")]public async Task<ActionResult> GetCategory(int categoryId)
         {
             var response = await _productCategoryRepo.GetByIdAsync(categoryId);
             return Ok(response);

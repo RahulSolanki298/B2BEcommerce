@@ -39,7 +39,9 @@
         public string BusinessPanCardNo { get; set; }
         
         public string BusinessAadharCardNo { get; set; }
-        
+
+        public string BusinessAccountType { get; set; }  //  Silver, Gold, premium account
+
         public int OwnerProfileImageId { get; set; }
 
     }

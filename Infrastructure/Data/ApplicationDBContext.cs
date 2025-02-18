@@ -42,5 +42,13 @@ namespace Infrastructure.Data
 
         public DbSet<ProductCaratSize> ProductCaratSize { get; set; }
 
+        public DbSet<OrderStatus> OrderStatus { get; set; }
+
+        public DbSet<BuyerOrderStatus> BuyerOrderStatus { get; set; }
+
+        public DbSet<Orders> Orders { get; set; }
+
+        public DbSet<OrderItems> OrderItems { get; set; }
+
     }
 }

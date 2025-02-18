@@ -60,6 +60,8 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
     options.AddPolicy("SuppliersOnly", policy => policy.RequireRole("Suppliers"));
+    options.AddPolicy("BuyersOnly", policy => policy.RequireRole("Buyers"));
+    options.AddPolicy("EmployeeOnly", policy => policy.RequireRole("Employee"));
 });
 
 // Dependency Injection for Generic Repository
@@ -67,6 +69,7 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped<IVirtualAppointmentRepository, VirtualAppointmentRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
+builder.Services.AddScoped<IBuyerRepository, BuyerRepository>();
 
 // Swagger and API Explorer
 builder.Services.AddEndpointsApiExplorer();
